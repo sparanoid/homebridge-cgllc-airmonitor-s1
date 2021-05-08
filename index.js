@@ -24,6 +24,8 @@ function ClearGrassAirMonitor(log, config) {
     this.nameHumidity = config.nameHumidity || 'Humidity';
     this.nameCo2 = config.nameCo2 || 'Co2';
     this.co2_Threshold = config.co2_Threshold || 1000;
+    this.pm25_Levels = config.pm25_Levels || [150, 115, 75, 35, 0];
+    this.tvoc_Levels = config.tvoc_Levels || [2000, 660, 220, 65, 0];
 
     this.device = null;
     this.mode = null;
@@ -35,18 +37,18 @@ function ClearGrassAirMonitor(log, config) {
     this.aqi = Characteristic.AirQuality.UNKNOWN;
 
     this.pm25Levels = [
-        [150, Characteristic.AirQuality.POOR],
-        [115, Characteristic.AirQuality.INFERIOR],
-        [75, Characteristic.AirQuality.FAIR],
-        [35, Characteristic.AirQuality.GOOD],
-        [0, Characteristic.AirQuality.EXCELLENT],
+        [pm25_Levels[0], Characteristic.AirQuality.POOR],
+        [pm25_Levels[1], Characteristic.AirQuality.INFERIOR],
+        [pm25_Levels[2], Characteristic.AirQuality.FAIR],
+        [pm25_Levels[3], Characteristic.AirQuality.GOOD],
+        [pm25_Levels[4], Characteristic.AirQuality.EXCELLENT],
     ];
     this.tvocLevels = [
-        [2000, Characteristic.AirQuality.POOR],
-        [660, Characteristic.AirQuality.INFERIOR],
-        [220, Characteristic.AirQuality.FAIR],
-        [65, Characteristic.AirQuality.GOOD],
-        [0, Characteristic.AirQuality.EXCELLENT],
+        [tvoc_Levels[0], Characteristic.AirQuality.POOR],
+        [tvoc_Levels[1], Characteristic.AirQuality.INFERIOR],
+        [tvoc_Levels[2], Characteristic.AirQuality.FAIR],
+        [tvoc_Levels[3], Characteristic.AirQuality.GOOD],
+        [tvoc_Levels[4], Characteristic.AirQuality.EXCELLENT],
     ];
 
     this.services = [];
@@ -61,23 +63,23 @@ function ClearGrassAirMonitor(log, config) {
 
     this.service = new Service.AirQualitySensor(this.name);
 
-	
+
         this.service
             .getCharacteristic(Characteristic.AirQuality)
             .on('get', this.getAirQuality.bind(this));
-	    
+
 
     this.service
         .getCharacteristic(Characteristic.StatusActive)
         .on('get', this.getStatusActive.bind(this));
 
-	this.pm2_5Characteristic = this.service.addCharacteristic(Characteristic.PM2_5Density);
+    this.pm2_5Characteristic = this.service.addCharacteristic(Characteristic.PM2_5Density);
         this.service
             .getCharacteristic(Characteristic.PM2_5Density)
             .on('get', this.getPM25.bind(this));
 
 
-	this.tvocCharacteristic = this.service.addCharacteristic(Characteristic.VOCDensity);
+    this.tvocCharacteristic = this.service.addCharacteristic(Characteristic.VOCDensity);
         this.service
             .getCharacteristic(Characteristic.VOCDensity)
             .on('get', this.getTvoc.bind(this));
@@ -135,7 +137,7 @@ function ClearGrassAirMonitor(log, config) {
     this.discover();
 }
 
-ClearGrassAirMonitor.prototype = { 
+ClearGrassAirMonitor.prototype = {
     discover: function() {
         var log = this.log;
         var that = this;
@@ -160,7 +162,7 @@ ClearGrassAirMonitor.prototype = {
                     log.debug('tvoc        : ' + device.property('tvoc'));
 
 
-			        that.loadData();
+                    that.loadData();
                 }
             })
             .catch(err => {
@@ -175,34 +177,34 @@ ClearGrassAirMonitor.prototype = {
         var log = this.log;
         var that = this;
 
-	    that.device.call("get_prop", ["co2","pm25","tvoc","temperature","humidity"]).then(result => {
-		    that.co2 = result['co2'];
-		    that.humidity = result['humidity'];
-		    that.pm25 = result['pm25'];
-		    that.tvoc = result['tvoc'];
-		    that.temperature = result['temperature'];
+        that.device.call("get_prop", ["co2","pm25","tvoc","temperature","humidity"]).then(result => {
+            that.co2 = result['co2'];
+            that.humidity = result['humidity'];
+            that.pm25 = result['pm25'];
+            that.tvoc = result['tvoc'];
+            that.temperature = result['temperature'];
 //            log.debug('result :  %s', JSON.stringify(result));
 //            log.debug('tvoc :  %s', that.tvoc);
-		    
+
             that.pm2_5Characteristic.updateValue(that.pm25);
-		    that.tvocCharacteristic.updateValue(that.tvoc);
-            
+            that.tvocCharacteristic.updateValue(that.tvoc);
+
             if(that.showTemperature){
-		      that.temperatureCharacteristic.updateValue(that.temperature);
+                that.temperatureCharacteristic.updateValue(that.temperature);
             }
-            
+
             if (that.showHumidity) {
-		      that.humidityCharacteristic.updateValue(that.humidity);
+                that.humidityCharacteristic.updateValue(that.humidity);
             }
-            
+
             if (that.showCo2) {
                 that.co2LevelCharacteristic.updateValue(that.co2);
-                if(that.co2 < that.co2_Threshold){
-    		      this.co2Characteristic.updateValue(Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
-               	}
-           	    else{
-    		      this.co2Characteristic.updateValue(Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
-               	} 
+                if (that.co2 < that.co2_Threshold) {
+                    this.co2Characteristic.updateValue(Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
+                }
+                else {
+                    this.co2Characteristic.updateValue(Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
+                }
             }
 
             that.updateAirQuality();
@@ -210,12 +212,12 @@ ClearGrassAirMonitor.prototype = {
         }).catch(function(err) {
             log.debug('Failed to get_prop  %s', err);
         });
-	    
+
         setTimeout(function() {
             that.loadData();
         }, 5000);
     },
-    
+
     getStatusActive: function(callback) {
         if (!this.device) {
             callback(new Error('No AirQuality Sensor is discovered.'));
@@ -302,12 +304,12 @@ ClearGrassAirMonitor.prototype = {
         }
 
         this.log.debug('getCo2Detected: %s', this.co2);
-	   if(this.co2 < this.co2_Threshold){
-	        callback(null, Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
-	   }
-	   else{
-	        callback(null, Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
-	   }
+        if(this.co2 < this.co2_Threshold){
+            callback(null, Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
+        }
+        else{
+            callback(null, Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
+        }
     },
 
 
@@ -364,6 +366,3 @@ ClearGrassAirMonitor.prototype = {
         return this.services;
     }
 };
-
-
-
