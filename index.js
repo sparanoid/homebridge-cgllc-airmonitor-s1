@@ -24,8 +24,6 @@ function ClearGrassAirMonitor(log, config) {
     this.nameHumidity = config.nameHumidity || 'Humidity';
     this.nameCo2 = config.nameCo2 || 'Co2';
     this.co2_Threshold = config.co2_Threshold || 1000;
-    this.pm25_Levels = config.pm25_Levels || [150, 115, 75, 35, 0];
-    this.tvoc_Levels = config.tvoc_Levels || [2000, 660, 220, 65, 0];
 
     this.device = null;
     this.mode = null;
@@ -37,18 +35,18 @@ function ClearGrassAirMonitor(log, config) {
     this.aqi = Characteristic.AirQuality.UNKNOWN;
 
     this.pm25Levels = [
-        [pm25_Levels[0], Characteristic.AirQuality.POOR],
-        [pm25_Levels[1], Characteristic.AirQuality.INFERIOR],
-        [pm25_Levels[2], Characteristic.AirQuality.FAIR],
-        [pm25_Levels[3], Characteristic.AirQuality.GOOD],
-        [pm25_Levels[4], Characteristic.AirQuality.EXCELLENT],
+        [150, Characteristic.AirQuality.POOR],
+        [115, Characteristic.AirQuality.INFERIOR],
+        [75, Characteristic.AirQuality.FAIR],
+        [35, Characteristic.AirQuality.GOOD],
+        [0, Characteristic.AirQuality.EXCELLENT],
     ];
     this.tvocLevels = [
-        [tvoc_Levels[0], Characteristic.AirQuality.POOR],
-        [tvoc_Levels[1], Characteristic.AirQuality.INFERIOR],
-        [tvoc_Levels[2], Characteristic.AirQuality.FAIR],
-        [tvoc_Levels[3], Characteristic.AirQuality.GOOD],
-        [tvoc_Levels[4], Characteristic.AirQuality.EXCELLENT],
+        [2000, Characteristic.AirQuality.POOR],
+        [660, Characteristic.AirQuality.INFERIOR],
+        [220, Characteristic.AirQuality.FAIR],
+        [65, Characteristic.AirQuality.GOOD],
+        [0, Characteristic.AirQuality.EXCELLENT],
     ];
 
     this.services = [];
