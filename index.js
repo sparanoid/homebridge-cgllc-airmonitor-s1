@@ -35,11 +35,11 @@ function ClearGrassAirMonitor(log, config) {
     this.aqi = Characteristic.AirQuality.UNKNOWN;
 
     this.pm25Levels = [
-        [150, Characteristic.AirQuality.POOR],
-        [115, Characteristic.AirQuality.INFERIOR],
-        [75, Characteristic.AirQuality.FAIR],
-        [35, Characteristic.AirQuality.GOOD],
-        [0, Characteristic.AirQuality.EXCELLENT],
+        [200, Characteristic.AirQuality.POOR],
+        [150, Characteristic.AirQuality.INFERIOR],
+        [115, Characteristic.AirQuality.FAIR],
+        [75, Characteristic.AirQuality.GOOD],
+        [20, Characteristic.AirQuality.EXCELLENT],
     ];
     this.tvocLevels = [
         [2000, Characteristic.AirQuality.POOR],
