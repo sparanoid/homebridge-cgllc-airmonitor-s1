@@ -1,6 +1,6 @@
 {
 	"name": "homebridge-qingping-airmonitor-cgs1",
-	"version": "0.0.14",
+	"version": "0.0.15",
 	"description": "Xiaomi Clear Grass(S1) plugin for Homebridge.",
 	"author": "Steve Kim <smallwood69@gmail.com>",
 	"license": "MIT",
